@@ -16,5 +16,23 @@ namespace CS332_Lab3
         {
             InitializeComponent();
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Task1 f1 = new Task1();
+            f1.Show();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Task2 f2 = new Task2();
+            f2.Show();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Task3 f3 = new Task3();
+            f3.Show();
+        }
     }
 }
