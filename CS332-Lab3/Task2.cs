@@ -15,15 +15,20 @@ namespace CS332_Lab3
         public Task2()
         {
             InitializeComponent();
-            bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            g = Graphics.FromImage(bmp);
-            pictureBox1.Image = bmp;
+            InitializeBMP();
         }
 
         Graphics g;
         int sizePen = 1;
         Point mouse;
         Bitmap bmp;
+
+        private void InitializeBMP()
+        {
+            bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            g = Graphics.FromImage(bmp);
+            pictureBox1.Image = bmp;
+        }
 
         //рисуем
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
@@ -44,7 +49,8 @@ namespace CS332_Lab3
         //Начать
         private void button2_Click(object sender, EventArgs e)
         {
-            foreach (var x in GetBorderPoints(bmp))
+            var y = GetBorderPoints(bmp);
+            foreach (var x in y)
                 bmp.SetPixel(x.X, x.Y, Color.Red);
             pictureBox1.Refresh();
         }
@@ -54,26 +60,24 @@ namespace CS332_Lab3
         {
             if (pictureBox1.Image != null)
                 pictureBox1.Image = null;
-            bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            g = Graphics.FromImage(bmp);
-            pictureBox1.Image = bmp;
+            InitializeBMP();
         }
 
         //Поиск начальной точки
         private Point FindStartPoint(Bitmap sourceImage)
         {
-            Color back_color = bmp.GetPixel(bmp.Width-1,0);
+            Color back_color = bmp.GetPixel(bmp.Width - 1, 0);
             Color cur_color = back_color;
-            
-            for (var x = bmp.Width - 1; x >= 0  ; x--) //x
-                for (var y = 0; y < bmp.Height - 1; y++) //y
-                    if (cur_color == back_color)
-                    {
-                        cur_color = bmp.GetPixel(x,y++);
-                    }
-                    else return new Point(x,y); 
 
-            return new Point(0,0);
+            for (var x = bmp.Width - 1; x >= 0; x--) //x
+                for (var y = 0; y < bmp.Height - 1; y++) //y
+                {
+                    cur_color = bmp.GetPixel(x, y);
+                    if (cur_color != back_color)
+                        return new Point(x, y);
+                }
+
+            return new Point(0, 0);
         }
 
         //Функция формирования списка граничных точек
@@ -83,8 +87,8 @@ namespace CS332_Lab3
             Point cur = FindStartPoint(bmp_img);
             border.Add(cur);
             Point start = cur;
-            Point next = cur;
-            Color borderColor = bmp_img.GetPixel(cur.X, cur.Y);
+            Point next ;
+            Color borderColor = bmp.GetPixel(cur.X,cur.Y); 
 
             //Будем идти против часовой стрелки и ходить внутри области
             int dir = 8;
@@ -106,20 +110,16 @@ namespace CS332_Lab3
                         case 6: next.Y++; break;
                         case 7: next.X++; next.Y++; break;
                     }
-                    //Если не нашли - останавливаемся
-                    if (next == start)
-                        break;
                     if (bmp_img.GetPixel(next.X, next.Y) == borderColor)
                     {
                         //Кладем в список
                         border.Add(next);
                         cur = next;
-                        //cur_dir = pred_Dir;
                         break;
                     }
                     dir = (dir + 1) % 8;
                 } while (dir != t);
-            } while (next != start);
+            } while (next != start || border.Where(a => a == next).Count() < 3);
 
             return border;
         }
